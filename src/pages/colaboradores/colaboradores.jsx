@@ -335,6 +335,7 @@ const Colaboradores = () => {
               <button
                 className="inline-flex w-full rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:w-auto"
                 onClick={abrirModal}
+                disabled={cargos.length == 0}
               >
                 Novo colaborador
               </button>
@@ -342,7 +343,7 @@ const Colaboradores = () => {
             {colaboradores.length == 0 && (
               <h2>
                 Nao existem colaboradores cadastrados. Adicione em Novo
-                colaborador.
+                colaborador. Obs: Cadastro nao habilitado se nao houver Cargo cadastrado.
               </h2>
             )}
             <ul role="list" className="divide-y divide-gray-100">

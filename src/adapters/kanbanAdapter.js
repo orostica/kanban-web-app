@@ -12,6 +12,6 @@ export function getRequest(URL) {
     return api.put(`/${URL}`, payload).then(response => response);
   }
   
-  export function deleteRequest(URL) {
-    return api.delete(`/${URL}`).then(response => response);
+  export function deleteRequest(URL, id) {
+    return api.delete(`/${URL}/${id}`).then(response => response);
   }

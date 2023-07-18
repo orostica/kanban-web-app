@@ -1,6 +1,7 @@
 import Modal from "react-modal";
 import { useState, useEffect } from "react";
 import api from "../../adapters/api";
+import { deleteRequest } from "../../adapters/kanbanAdapter";
 
 Modal.setAppElement("#root");
 
@@ -11,6 +12,8 @@ const Colaboradores = () => {
   const [nome, setNome] = useState("");
   const [linkedin, setLinkedin] = useState("");
   const [cargoId, setCargoId] = useState("");
+  const [modalEditar, setModalEditar] = useState(false);
+  const [colaboradorSelecionado, setColaboradorSelecionado] = useState({});
 
   const getColaboradores = async () => {
     try {
@@ -67,8 +70,159 @@ const Colaboradores = () => {
     }
   };
 
+  const abrirModalEditar = (cargo) => {
+    setColaboradorSelecionado(cargo);
+    setModalEditar(true);
+  };
+
+  const fecharModalEditar = () => {
+    setColaboradorSelecionado({});
+    setModalEditar(false);
+  };
+
+  const handleEditColaborador = async () => {
+    try {
+      const response = await api.put("Colaborador", colaboradorSelecionado);
+
+      console.log(response);
+
+      getColaboradores();
+      fecharModalEditar();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDeleteColaborador = async (id) => {
+    try {
+      const response = await deleteRequest("Colaborador", id);
+
+      console.log(response);
+
+      getColaboradores();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
+      <Modal
+        isOpen={modalEditar}
+        onRequestClose={fecharModalEditar}
+        contentLabel="Modal"
+        style={{
+          content: {
+            justifyItems: "space-between",
+            top: "20%",
+            left: "20%",
+            bottom: "auto",
+            right: "20%",
+          },
+        }}
+      >
+        <div className="border-b border-gray-900/10 pb-12">
+          <h2 className="text-base font-semibold leading-7 text-gray-900">
+            Editar Colaborador
+          </h2>
+
+          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="first-name"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Nome
+              </label>
+              <div className="mt-2">
+                <input
+                  type="text"
+                  name="nome"
+                  id="nome"
+                  className="block w-full rounded-md border-0 py-1.5 p-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  value={colaboradorSelecionado.nome}
+                  onChange={(e) =>
+                    setColaboradorSelecionado({
+                      ...colaboradorSelecionado,
+                      nome: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="last-name"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Linkedin
+              </label>
+              <div className="mt-2">
+                <input
+                  type="text"
+                  name="linkedin"
+                  id="linkedin"
+                  className="block w-full rounded-md border-0 py-1.5 p-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  value={colaboradorSelecionado.linkedin}
+                  onChange={(e) =>
+                    setColaboradorSelecionado({
+                      ...colaboradorSelecionado,
+                      linkedin: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-3">
+              <label
+                htmlFor="country"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Cargo
+              </label>
+              <div className="mt-2">
+                <select
+                  id="cargo"
+                  name="cargo"
+                  className="block w-full rounded-md border-0 py-1.5 p-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
+                  value={colaboradorSelecionado.cargoId}
+                  onChange={(e) =>
+                    setColaboradorSelecionado({
+                      ...colaboradorSelecionado,
+                      cargoId: e.target.value,
+                    })
+                  }
+                >
+                  <option value={0}>Selecione</option>
+                  {cargos.map((cargo) => (
+                    <option key={cargo.id} value={cargo.id}>
+                      {cargo.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+          <button
+            type="button"
+            className="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto"
+            onClick={() => handleEditColaborador()}
+          >
+            Salvar
+          </button>
+          <button
+            type="button"
+            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+            onClick={() => fecharModalEditar()}
+          >
+            Cancelar
+          </button>
+        </div>
+      </Modal>
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={fecharModal}
@@ -161,7 +315,7 @@ const Colaboradores = () => {
           <button
             type="button"
             className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-            onClick={() => setIsOpen(false)}
+            onClick={() => fecharModal()}
           >
             Cancelar
           </button>
@@ -185,7 +339,12 @@ const Colaboradores = () => {
                 Novo colaborador
               </button>
             </div>
-
+            {colaboradores.length == 0 && (
+              <h2>
+                Nao existem colaboradores cadastrados. Adicione em Novo
+                colaborador.
+              </h2>
+            )}
             <ul role="list" className="divide-y divide-gray-100">
               {colaboradores.map((colaborador) => (
                 <li
@@ -198,15 +357,26 @@ const Colaboradores = () => {
                         {colaborador.nome || "Nao informado"}
                       </p>
                       <p className="mt-1 truncate text-xs leading-5 text-gray-500">
+                        {colaborador.cargo.nome || "Nao informado"}
+                      </p>
+                      <p className="mt-1 truncate text-xs leading-5 text-gray-500">
                         {colaborador.linkedin || "Nao informado"}
                       </p>
                     </div>
                   </div>
                   <div className="hidden sm:flex sm:flex-col sm:items-end">
-                    <p className="text-sm leading-6 text-gray-900">
-                      {colaborador.cargo.nome}
-                    </p>
-                    <a onClick={()=>console.log(colaborador.id)} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Editar</a>
+                    <a
+                      onClick={() => abrirModalEditar(colaborador)}
+                      className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                    >
+                      Editar
+                    </a>
+                    <a
+                      onClick={() => handleDeleteColaborador(colaborador.id)}
+                      className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                    >
+                      Excluir
+                    </a>
                   </div>
                 </li>
               ))}
